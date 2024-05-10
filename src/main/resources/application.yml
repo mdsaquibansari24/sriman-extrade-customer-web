@@ -5,3 +5,18 @@ spring:
     name: xtradecustomer
   mvc:
     static-path-pattern: /static/**
+  messages:
+    basename: errors
+
+logging:
+  level:
+    root: info
+  logback:
+    rollingpolicy:
+      file-name-pattern: /var/log/xtrade-web-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 100GB
+
+userAccountService:
+  url: http://localhost:8090
