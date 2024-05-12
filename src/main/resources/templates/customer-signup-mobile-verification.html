@@ -26,6 +26,8 @@
     </div>
 </th:block>
 <th:block layout:fragment="body">
-    Mobile Verification Page.
+    Dear, <span th:text="${customerName}">User</span>
+    <p>Your registration has been successful, please procced for verifying your <span
+            th:text="${mobileNo}">MobileNo</span> and <span th:text="${emailAddress}">emailAddress</span></p>
 </th:block>
 </html>

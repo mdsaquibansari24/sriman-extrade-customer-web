@@ -23,7 +23,7 @@ public class CustomerSignupFormValidator implements Validator {
 
         signupForm = (CustomerSignupForm) target;
 
-        if (errors.hasFieldErrors("password") == false && errors.hasFieldErrors("rePassword")) {
+        if (errors.hasFieldErrors("password") == false && errors.hasFieldErrors("rePassword") == false) {
             if (signupForm.getPassword().equals(signupForm.getRePassword()) == false) {
                 errors.rejectValue("rePassword", "rePassword.mismatch");
             }
