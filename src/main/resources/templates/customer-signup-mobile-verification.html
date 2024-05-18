@@ -4,7 +4,7 @@
       layout:decorate="~{layout/full-page-layout.html}">
 
 <head>
-    <title>Customer Registration</title>
+    <title>Mobile Number Verification</title>
 </head>
 <th:block layout:fragment="breadcrumb">
     <div id="breadcrumb" class="section">
@@ -16,8 +16,9 @@
                     <h3 class="breadcrumb-header">Customer Registration</h3>
                     <ul class="breadcrumb-tree">
                         <li><a href="#">Home</a></li>
-                        <li class="active">Sign Up</li>
+                        <li class="active">Verify OTP</li>
                     </ul>
+
                 </div>
             </div>
             <!-- /row -->
@@ -26,8 +27,49 @@
     </div>
 </th:block>
 <th:block layout:fragment="body">
-    Dear, <span th:text="${customerName}">User</span>
-    <p>Your registration has been successful, please procced for verifying your <span
-            th:text="${mobileNo}">MobileNo</span> and <span th:text="${emailAddress}">emailAddress</span></p>
+    <div class="section">
+        <!-- container -->
+        <div class="container">
+            <!-- row -->
+            <div class="row">
+                <div class="col-md-10">
+                    <p th:if="${accountVerificationStatus == null}">
+                        Dear <b th:text="${mobileOTPVerificationForm.customerName}">Customer</b>, you have signed up with us, we sent verification
+                        link to your email address: <span th:text="${mobileOTPVerificationForm.verificationEmailAddress}">emailAddress</span> and an OTP
+                        number
+                        to your mobile number: <span th:text="${mobileOTPVerificationForm.verificationMobileNo}">mobile number</span>. Please verify the
+                        email address by clicking on the link sent, along with that please proceed on verifying your
+                        mobile
+                        number by providing the otp code below.
+                    </p>
+                </div>
+            </div>
+
+            <form method="post" th:object="${mobileOTPVerificationForm}"
+                  th:action="@{/customer/signup/verifyMobileOTP}">
+
+                <div class="row justify-content-md-center" th:if="${#fields.hasErrors('global')}">
+                    <div class="col-md-10">
+                        <p class="text-danger" th:errors="*{global}"></p>
+                    </div>
+                </div>
+                <div class="row justify-content-md-center">
+                    <div class="col-md-10">
+                        <div class="billing-details">
+                            <div class="form-group">
+                                <input class="input" type="text" name="otpCode" placeholder="OTP Number">
+                                <p class="text-danger" th:if="${#fields.hasErrors('otpCode')}" th:errors="*{otpCode}"></p>
+                            </div>
+                            <input type="hidden" name="userAccountId" th:field="*{userAccountId}">
+                            <input type="hidden" name="verificationEmailAddress" th:field="*{verificationEmailAddress}">
+                            <input type="hidden" name="verificationMobileNo" th:field="*{verificationMobileNo}">
+                            <button class="primary-btn order-submit" type="submit">Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </th:block>
 </html>

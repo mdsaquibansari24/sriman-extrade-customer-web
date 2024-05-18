@@ -1,7 +1,9 @@
 package com.extrade.customer.controller;
 
+import com.extrade.customer.dto.AccountVerificationStatusDto;
 import com.extrade.customer.dto.CustomerRegistrationDto;
 import com.extrade.customer.form.CustomerSignupForm;
+import com.extrade.customer.form.MobileOTPVerificationForm;
 import com.extrade.customer.service.UserAccountService;
 import com.extrade.customer.utils.StringUtils;
 import com.extrade.customer.validator.CustomerSignupFormValidator;
@@ -20,10 +22,6 @@ public class CustomerSignupFormController {
     private final CustomerSignupFormValidator signupFormValidator;
     private final UserAccountService userAccountService;
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.addValidators(signupFormValidator);
-    }
 
     @GetMapping("/signup")
     public String showCustomerSignupForm(Model model) {
@@ -34,9 +32,13 @@ public class CustomerSignupFormController {
     }
 
     @PostMapping("/signup")
-    public String doSignup(@ModelAttribute("customerSignupForm") @Valid CustomerSignupForm signupForm,
+    public String doSignup(@ModelAttribute("customerSignupForm") CustomerSignupForm signupForm,
                            BindingResult errors, Model model) {
         CustomerRegistrationDto registrationDto = null;
+
+        if (signupFormValidator.supports(signupForm.getClass())) {
+            signupFormValidator.validate(signupForm, errors);
+        }
         if (errors.hasErrors()) {
             return "customer-signup";
         }
@@ -49,14 +51,49 @@ public class CustomerSignupFormController {
         registrationDto.setPassword(signupForm.getPassword());
         registrationDto.setEmailAddress(signupForm.getEmailAddress());
         registrationDto.setMobileNo(signupForm.getMobileNo());
-        long customerId = Long.parseLong(userAccountService.registerCustomer(registrationDto));
+        int customerId = Integer.parseInt(userAccountService.registerCustomer(registrationDto));
 
-        model.addAttribute("customerName", signupForm.getFirstName()+ " "+ signupForm.getLastName());
-        model.addAttribute("customerId", customerId);
-        model.addAttribute("emailAddress", StringUtils.maskEmailAddress(signupForm.getEmailAddress(), 4));
-        model.addAttribute("mobileNo", StringUtils.maskMobileNo(signupForm.getMobileNo(), 4));
+        MobileOTPVerificationForm verificationForm = new MobileOTPVerificationForm();
+        verificationForm.setUserAccountId(customerId);
+        verificationForm.setVerificationEmailAddress(StringUtils.maskEmailAddress(signupForm.getEmailAddress(), 4));
+        verificationForm.setVerificationMobileNo(StringUtils.maskMobileNo(signupForm.getMobileNo(), 4));
+        verificationForm.setCustomerName(signupForm.getFirstName() + " " + signupForm.getLastName());
 
+        model.addAttribute("mobileOTPVerificationForm", verificationForm);
 
         return "customer-signup-mobile-verification";
     }
+
+    @PostMapping("/signup/verifyMobileOTP")
+    public String verifyMobileOTP(@ModelAttribute("mobileOTPVerificationForm") MobileOTPVerificationForm form, BindingResult errors, Model model) {
+        AccountVerificationStatusDto accountVerificationStatusDto = null;
+
+        accountVerificationStatusDto = userAccountService.verifyOTP(form.getUserAccountId(), form.getOtpCode(), "VERIFY_MOBILE");
+
+        
+        model.addAttribute("accountVerificationStatus", accountVerificationStatusDto);
+        return "signup-status";
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
