@@ -40,4 +40,7 @@ public interface UserAccountService {
 
     @PutMapping(value = "/{userAccountId}/resendEmailVerificationLink")
     ResponseEntity<Void> resendEmailVerificationLink(@PathVariable("userAccountId") int userAccountId);
+
+    @GetMapping(value = "/{emailAddress}/verificationStatusByEmail", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    AccountVerificationStatusDto getUserAccountVerificationStatusByEmail(@RequestParam("emailAddress") String emailAddress);
 }

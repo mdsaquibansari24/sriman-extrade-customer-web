@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .accountExpired(false)
                     .credentialsExpired(false)
                     .passwordEncoder((password) -> {
-                        return passwordEncoder.encode(password);
+                        return password;
                     })
                     .authorities(userAccountDto.getRoleCode())
                     .build();

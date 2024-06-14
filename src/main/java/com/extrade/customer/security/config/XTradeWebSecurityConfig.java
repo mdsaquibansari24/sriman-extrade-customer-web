@@ -55,7 +55,7 @@ public class XTradeWebSecurityConfig {
 
         exceptionMappings.put("org.springframework.security.authentication.BadCredentialsException", "/customer/login?error=bad");
         exceptionMappings.put("org.springframework.security.authentication.DisabledException", "/customer/login?error=disabled");
-        exceptionMappings.put("org.springframework.security.authentication.LockedException", "/customer/locked-find-and-activate");
+        exceptionMappings.put("org.springframework.security.authentication.LockedException", "/customer/login?error=locked");
 
         failureHandler.setExceptionMappings(exceptionMappings);
         return failureHandler;

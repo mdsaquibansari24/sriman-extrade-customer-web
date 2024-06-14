@@ -13,6 +13,7 @@ import com.extrade.customer.utils.StringUtils;
 import com.extrade.customer.utils.XTradeConstants;
 import com.extrade.customer.validator.CustomerSignupFormValidator;
 import com.extrade.customer.validator.MobileOTPVerificationFormValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class CustomerSignupFormController {
     }
 
     @PostMapping("/signup")
-    public String doSignup(@ModelAttribute("customerSignupForm") CustomerSignupForm signupForm,
+    public String doSignup(@ModelAttribute("customerSignupForm") @Valid CustomerSignupForm signupForm,
                            BindingResult errors, Model model) {
         CustomerRegistrationDto registrationDto = null;
 
@@ -78,7 +79,7 @@ public class CustomerSignupFormController {
     }
 
     @PostMapping("/signup/verifyMobileOTP")
-    public String verifyMobileOTP(@ModelAttribute("mobileOTPVerificationForm") MobileOTPVerificationForm form
+    public String verifyMobileOTP(@ModelAttribute("mobileOTPVerificationForm") @Valid MobileOTPVerificationForm form
             , BindingResult errors, Model model,
                                   Locale locale) {
         AccountVerificationStatusDto accountVerificationStatusDto = null;
@@ -97,7 +98,9 @@ public class CustomerSignupFormController {
             if (accountVerificationStatusDto.getAccountStatus().equals(XTradeConstants.USER_ACCOUNT_ACTIVE)) {
                 signupStatusMessage = messageSource.getMessage("userAccount.activated", null, locale);
             } else if (accountVerificationStatusDto.getEmailVerificationStatus() == 0) {
-                signupStatusMessage = messageSource.getMessage("userAccount.mobileOTPVerified", null, locale);
+                model.addAttribute("emailAddress", StringUtils.maskEmailAddress(accountVerificationStatusDto.getEmailAddress(), 4));
+                model.addAttribute("userAccountId", form.getUserAccountId());
+                return "email-verification-pending";
             }
         } catch (OTPMismatchException e) {
             log.warn("otpCode mis-match", e);
@@ -169,9 +172,36 @@ public class CustomerSignupFormController {
         return outcome;
     }
 
-    @GetMapping("/locked-find-and-activate")
+    @GetMapping("/lockedFindAndActivate")
     public String lockedShowFindAccountPage() {
         return "locked-find-and-activate-account";
+    }
+
+    @PostMapping(value = "/lookupAndActivateAccount")
+    public String lookupAndActivateAccount(@RequestParam("emailAddress") String emailAddress, Model model, Locale locale) {
+        AccountVerificationStatusDto accountVerificationStatusDto = null;
+        MobileOTPVerificationForm mobileOTPVerificationForm = null;
+        String signupStatusMessage = null;
+        String outcome = null;
+
+
+        accountVerificationStatusDto = userAccountService.getUserAccountVerificationStatusByEmail(emailAddress);
+        if(accountVerificationStatusDto.getMobileVerificationStatus() == 0) {
+            mobileOTPVerificationForm = new MobileOTPVerificationForm();
+            mobileOTPVerificationForm.setUserAccountId(accountVerificationStatusDto.getUserAccountId());
+            mobileOTPVerificationForm.setVerificationEmailAddress(StringUtils.maskEmailAddress(accountVerificationStatusDto.getEmailAddress(), 4));
+            mobileOTPVerificationForm.setVerificationMobileNo(StringUtils.maskMobileNo(accountVerificationStatusDto.getMobileNo(), 4));
+            signupStatusMessage = messageSource.getMessage("userAccount.mobilePendingForActivation", null, locale);
+            model.addAttribute("mobileOTPVerificationForm", mobileOTPVerificationForm);
+            model.addAttribute("signupStatus", signupStatusMessage);
+            outcome = "customer-signup-mobile-verification";
+        }else {
+            model.addAttribute("emailAddress", StringUtils.maskEmailAddress(accountVerificationStatusDto.getEmailAddress(), 4));
+            model.addAttribute("userAccountId", accountVerificationStatusDto.getUserAccountId());
+            outcome = "email-verification-pending";
+        }
+
+        return outcome;
     }
 
     @ExceptionHandler(UserAccountNotFoundException.class)
