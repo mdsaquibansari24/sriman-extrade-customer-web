@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -167,6 +169,11 @@ public class CustomerSignupFormController {
         return outcome;
     }
 
+    @GetMapping("/locked-find-and-activate")
+    public String lockedShowFindAccountPage() {
+        return "locked-find-and-activate-account";
+    }
+
     @ExceptionHandler(UserAccountNotFoundException.class)
     public String handleUserAccountNotFoundException(UserAccountNotFoundException e, Model model, Locale locale) {
         model.addAttribute("errorMessage", messageSource.getMessage("userAccount.notFound", null, locale));
@@ -174,6 +181,31 @@ public class CustomerSignupFormController {
     }
 
 
+    @GetMapping("/{userAccountId}/resendMobileOTP")
+    @ResponseBody
+    public ResponseEntity<Void> resendMobileOTP(@PathVariable("userAccountId") int userAccountId) {
+        try {
+            userAccountService.resendMobileOTPCode(userAccountId);
+        } catch (UserAccountNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (UserAccountAlreadyActivatedException e) {
+            return ResponseEntity.status(HttpStatus.GONE).build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{userAccountId}/resendVerificationEmail")
+    @ResponseBody
+    public ResponseEntity<Void> resendEmailVerificationLink(@PathVariable("userAccountId") int userAccountId) {
+        try {
+            userAccountService.resendEmailVerificationLink(userAccountId);
+        } catch (UserAccountNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (UserAccountAlreadyActivatedException e) {
+            return ResponseEntity.status(HttpStatus.GONE).build();
+        }
+        return ResponseEntity.ok().build();
+    }
 }
 
 

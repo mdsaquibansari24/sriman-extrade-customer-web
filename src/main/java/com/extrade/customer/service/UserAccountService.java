@@ -4,8 +4,13 @@ import com.extrade.customer.dto.AccountVerificationStatusDto;
 import com.extrade.customer.dto.CustomerRegistrationDto;
 import com.extrade.customer.dto.UserAccountDto;
 import com.extrade.customer.feign.config.UserAccountServiceFeignConfiguration;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "userAccountService", url = "${userAccountService.url}/account", configuration = UserAccountServiceFeignConfiguration.class)
@@ -29,4 +34,10 @@ public interface UserAccountService {
 
     @GetMapping(value = "/details", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public UserAccountDto getUserAccountByEmailAddress(@RequestParam("emailAddress") String emailAddress);
+
+    @PutMapping(value = "/{userAccountId}/resendMobileOTP")
+    ResponseEntity<Void> resendMobileOTPCode(@PathVariable("userAccountId") int userAccountId);
+
+    @PutMapping(value = "/{userAccountId}/resendEmailVerificationLink")
+    ResponseEntity<Void> resendEmailVerificationLink(@PathVariable("userAccountId") int userAccountId);
 }

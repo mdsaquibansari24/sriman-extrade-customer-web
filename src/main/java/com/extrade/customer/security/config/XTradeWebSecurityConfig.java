@@ -23,8 +23,13 @@ public class XTradeWebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests((requests) -> {
                     requests
-                            .requestMatchers("/home", "/static/**", "/customer/signup")
+                            .requestMatchers("/home",
+                                    "/static/**",
+                                    "/customer/**",
+                                    "/error")
                             .permitAll().anyRequest().authenticated();
+                }).csrf(csrf -> {
+                    csrf.disable();
                 }).formLogin((formLoginConfigurer) -> {
                     formLoginConfigurer.loginPage("/customer/login")
                             .permitAll()
@@ -36,6 +41,7 @@ public class XTradeWebSecurityConfig {
                 }).logout(logout -> logout
                         .logoutSuccessUrl("/customer/logout")
                         .invalidateHttpSession(true).permitAll())
+
                 .build();
     }
 
@@ -47,8 +53,9 @@ public class XTradeWebSecurityConfig {
         failureHandler = new ExceptionMappingAuthenticationFailureHandler();
         exceptionMappings = new Properties();
 
-        exceptionMappings.put("org.springframework.security.authentication.BadCredentialsException", "/login?error=bad");
-        exceptionMappings.put("org.springframework.security.authentication.DisabledException", "/login?error=disabled");
+        exceptionMappings.put("org.springframework.security.authentication.BadCredentialsException", "/customer/login?error=bad");
+        exceptionMappings.put("org.springframework.security.authentication.DisabledException", "/customer/login?error=disabled");
+        exceptionMappings.put("org.springframework.security.authentication.LockedException", "/customer/locked-find-and-activate");
 
         failureHandler.setExceptionMappings(exceptionMappings);
         return failureHandler;

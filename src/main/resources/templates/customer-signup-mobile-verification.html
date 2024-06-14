@@ -63,7 +63,11 @@
                                 <input class="input" type="text" name="otpCode" placeholder="OTP Number">
                                 <p class="text-danger" th:if="${#fields.hasErrors('otpCode')}" th:errors="*{otpCode}"></p>
                             </div>
-                            <input type="hidden" name="userAccountId" th:field="*{userAccountId}">
+                            <div class="form-group">
+                                <p class="text-danger"><a href="javascript:resendMobileOTP();">Resend OTP</a></p>
+                                <p id="resentMobileOTPMessage" style="display:none;" class="text-success">Mobile OTPCode has been re-sent</p>
+                            </div>
+                            <input type="hidden" id="userAccountId" name="userAccountId" th:field="*{userAccountId}">
                             <input type="hidden" name="customerName" th:field="*{customerName}">
                             <input type="hidden" name="verificationEmailAddress" th:field="*{verificationEmailAddress}">
                             <input type="hidden" name="verificationMobileNo" th:field="*{verificationMobileNo}">
@@ -72,8 +76,34 @@
                     </div>
                 </div>
             </form>
-
         </div>
     </div>
+    <script th:inline="javascript">
+        function resendMobileOTP() {
+            var userAccountId = null;
+
+            userAccountId = $("#userAccountId").val();
+            $.ajax({
+                type: "GET",
+                url: baseURL +"/customer/"+userAccountId+"/resendMobileOTP",
+                success: function(data) {
+                    $("#resentMobileOTPMessage").fadeIn(1000);
+                    $("#resentMobileOTPMessage").fadeOut(2000);
+                },
+                error: function(jqXHR, error, status) {
+                    if(jqXHR.status == "410") {
+                        $("#resentMobileOTPMessage").text("Unable to resend the OTP, because user is already activated. Proceed for login");
+                    } else if(jqXHR.status=="404") {
+                        $("#resentMobileOTPMessage").text("Unable to locate the user to resend the OTP, if the problem persist, please contact customer service");
+                    }else {
+                        $("#resentMobileOTPMessage").text("Unknown error");
+                    }
+
+                    $("#resentMobileOTPMessage").css("text-danger");
+                    $("#resentMobileOTPMessage").fadeIn(1000);
+                }
+            });
+        }
+    </script>
 </th:block>
 </html>

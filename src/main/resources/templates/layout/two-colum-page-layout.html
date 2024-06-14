@@ -41,6 +41,10 @@
     <script th:src="@{~/static/js/nouislider.min.js}"></script>
     <script th:src="@{~/static/js/jquery.zoom.min.js}"></script>
     <script th:src="@{~/static/js/main.js}"></script>
+
+    <script th:inline="javascript">
+        var baseURL = [[${@environment.getProperty('xtrade.default.url')}]];
+    </script>
 </head>
 <body>
 <!-- HEADER -->
