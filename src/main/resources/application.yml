@@ -23,6 +23,8 @@ logging:
 
 userAccountService:
   url: http://localhost:8090
+storeService:
+  url: http://localhost:8091
 
 xtrade:
   default:

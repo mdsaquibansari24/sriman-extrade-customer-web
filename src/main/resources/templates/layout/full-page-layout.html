@@ -44,6 +44,8 @@
 
     <script th:inline="javascript">
         var baseURL = [[${@environment.getProperty('xtrade.default.url')}]];
+        var storeServiceURL = [[${@environment.getProperty('storeService.url')}]];
+        var userAccountServiceURL = [[${@environment.getProperty('userAccountService.url')}]];
     </script>
 </head>
 <body>
@@ -53,12 +55,12 @@
         <!-- TOP HEADER -->
         <div id="top-header">
             <div class="container">
-                <div sec:authorize="isAuthenticated()">
-                    This content is only shown to authenticated users.
-                </div>
                 <ul class="header-links pull-right" sec:authorize="isAnonymous()">
                     <li><a th:href="@{~/customer/login}"><i class="fa fa-sign-in"></i> Login</a></li>
                     <li><a th:href="@{~/customer/signup}"><i class="fa fa-user-plus"></i> Signup</a></li>
+                </ul>
+                <ul class="header-links pull-left" sec:authorize="isAuthenticated()">
+                    <li><span style="color:white;">Store: XTrade Jubliee TS</span> <a href="#">change</a></li>
                 </ul>
                 <ul class="header-links pull-right" sec:authorize="isAuthenticated()">
                     <li><a href="#"><i class="fa fa-user-o"></i> <span sec:authentication="name"></span></a></li>
@@ -376,7 +378,55 @@
         <!-- /bottom footer -->
     </footer>
     <!-- /FOOTER -->
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#chooseStoreModal">
+        Launch demo modal
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="chooseStoreModal" tabindex="-1" role="dialog" aria-labelledby="chooseStoreModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Choose Store</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-inline">
+                        <div class="form-group mb-4">
+                            <label for="globalCitySelector" style="margin-right: 8px;">City :</label>
+                            <select id="globalCitySelector" name="globalCitySelector" class="input" placeholder="Choose City" onchange="populateStores();">
+                                <option>Hyderabad</option>
+                                <option>Chennai</option>
+                                <option>Mumbai</option>
+                                <option>Andhra Pradesh</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="globalStoreSelector" style="margin-right: 8px;">Store:</label>
+                            <select id="globalStoreSelector" name="globalStoreSelector" class="input" placeholder="Choose Store">
+                                <option>Jubliee Store</option>
+                                <option>Warangal Fort Store</option>
+                                <option>Juhu Store</option>
+                                <option>High Court Store</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Switch</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script th:src="@{~/static/js/main.js}"></script>
+    <script th:src="@{~/static/js/custom.js}"></script>
+    <script th:inline="javascript">
+        showSwitchStoreModal();
+    </script>
 </th:block>
 </body>
 </html>
